@@ -2,7 +2,7 @@
 <h1>{{ .DocumentName }}</h1>
 <p>by <a href="/user/{{ .AuthorID }}">{{ .AuthorName }}</a></p>
 {{ if eq .Status "pending" }}
-<article><em>This article is pending review.</em></article>
+<article><em>This article is compiling.</em></article>
 {{ else if eq .Status "failed" }}
 <article class="error"><em>This article failed to compile.</em></article>
 {{ else if eq .Status "published" }}
@@ -10,7 +10,18 @@
   <ul>
     <li><a href="/article/{{ .ArticleID }}/source">Typst source</a></li>
     <li><a href="/article/{{ .ArticleID }}/pdf" target="_blank">PDF</a></li>
+    {{ if .IsAuthenticated }}
+    <li><a href="/article/{{ .ArticleID }}/review">Write a review</a></li>
+    {{ end }}
   </ul>
 </nav>
+{{ end }}
+{{ if .Reviews }}
+<h2>Reviews</h2>
+<ul>
+  {{ range .Reviews }}
+  <li><a href="/review/{{ .ID }}">Review #{{ .ID }}</a> by <a href="/user/{{ .ReviewerID }}">{{ .ReviewerName }}</a></li>
+  {{ end }}
+</ul>
 {{ end }}
 {{ end }}

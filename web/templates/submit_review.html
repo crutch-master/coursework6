@@ -1,0 +1,12 @@
+{{ define "content" }}
+<h1>Review: {{ .DocumentName }}</h1>
+{{ if .Error }}
+<article class="error">{{ .Error }}</article>
+{{ end }}
+<form action="/article/{{ .ArticleID }}/review" method="POST">
+  <label>Review text
+    <textarea name="text" rows="6"></textarea>
+  </label>
+  <button type="submit">Submit review</button>
+</form>
+{{ end }}

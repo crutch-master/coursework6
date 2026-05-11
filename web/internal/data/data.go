@@ -15,5 +15,10 @@ type TemplateData struct {
 	IsOwner         bool
 	AuthorID        uint64
 	AuthorName      string
+	ReviewID        uint64
+	ReviewText      string
+	ReviewerID      uint64
+	ReviewerName    string
 	Articles        []model.ArticleListItem
+	Reviews         []model.ReviewListItem
 }

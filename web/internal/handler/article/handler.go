@@ -12,6 +12,7 @@ import (
 	"github.com/crutch-master/coursework6/web/internal/middleware"
 	"github.com/crutch-master/coursework6/web/internal/model"
 	articleRepo "github.com/crutch-master/coursework6/web/internal/repository/article"
+	reviewRepo "github.com/crutch-master/coursework6/web/internal/repository/review"
 	userRepo "github.com/crutch-master/coursework6/web/internal/repository/user"
 	s3client "github.com/crutch-master/coursework6/web/internal/s3"
 )
@@ -21,14 +22,16 @@ type Handler struct {
 	articleRepo *articleRepo.Repository
 	s3Client    *s3client.Client
 	userRepo    *userRepo.Repository
+	reviewRepo  *reviewRepo.Repository
 }
 
-func NewHandler(templ *template.Template, articleRepo *articleRepo.Repository, s3Client *s3client.Client, userRepo *userRepo.Repository) *Handler {
+func NewHandler(templ *template.Template, articleRepo *articleRepo.Repository, s3Client *s3client.Client, userRepo *userRepo.Repository, reviewRepo *reviewRepo.Repository) *Handler {
 	return &Handler{
 		templ:       templ,
 		articleRepo: articleRepo,
 		s3Client:    s3Client,
 		userRepo:    userRepo,
+		reviewRepo:  reviewRepo,
 	}
 }
 
@@ -64,6 +67,13 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	reviews, err := h.reviewRepo.ListByArticle(r.Context(), a.ID)
+	if err != nil {
+		slog.Error("failed to list reviews", "err", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	d := data.TemplateData{
 		IsAuthenticated: isAuth,
 		DocumentName:    a.DocumentName,
@@ -72,6 +82,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		ArticleID:       a.ID,
 		AuthorID:        a.AuthorID,
 		AuthorName:      author.Name,
+		Reviews:         reviews,
 	}
 
 	if err := h.templ.ExecuteTemplate(w, "base", d); err != nil {

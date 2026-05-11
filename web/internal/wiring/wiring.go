@@ -14,9 +14,11 @@ import (
 	"github.com/crutch-master/coursework6/web/internal/handler/login"
 	"github.com/crutch-master/coursework6/web/internal/handler/profile"
 	"github.com/crutch-master/coursework6/web/internal/handler/register"
+	"github.com/crutch-master/coursework6/web/internal/handler/review"
 	"github.com/crutch-master/coursework6/web/internal/handler/submit"
 	"github.com/crutch-master/coursework6/web/internal/middleware"
 	articleRepo "github.com/crutch-master/coursework6/web/internal/repository/article"
+	reviewRepo "github.com/crutch-master/coursework6/web/internal/repository/review"
 	"github.com/crutch-master/coursework6/web/internal/repository/user"
 	s3client "github.com/crutch-master/coursework6/web/internal/s3"
 	"github.com/crutch-master/coursework6/web/static"
@@ -60,9 +62,12 @@ func Wire(ctx context.Context) (http.Handler, error) {
 	profileTempl := parsePage(base, "profile.html")
 	submitTempl := parsePage(base, "submit.html")
 	articleTempl := parsePage(base, "article.html")
+	reviewTempl := parsePage(base, "review.html")
+	submitReviewTempl := parsePage(base, "submit_review.html")
 
 	userRepo := user.NewRepository(pool)
 	artRepo := articleRepo.NewRepository(pool)
+	revRepo := reviewRepo.NewRepository(pool)
 	secret := os.Getenv("JWT_SECRET")
 	s3c, err := s3client.NewClient(ctx,
 		os.Getenv("S3_ENDPOINT"),
@@ -78,7 +83,8 @@ func Wire(ctx context.Context) (http.Handler, error) {
 	latestCount := getEnvInt("INDEX_LATEST_COUNT", 5)
 	indexHandler := index.NewHandler(indexTempl, artRepo, latestCount)
 	profileHandler := profile.NewHandler(profileTempl, userRepo)
-	articleHandler := article.NewHandler(articleTempl, artRepo, s3c, userRepo)
+	articleHandler := article.NewHandler(articleTempl, artRepo, s3c, userRepo, revRepo)
+	reviewHandler := review.NewHandler(reviewTempl, revRepo, artRepo, userRepo)
 
 	mux := &http.ServeMux{}
 
@@ -95,6 +101,9 @@ func Wire(ctx context.Context) (http.Handler, error) {
 	mux.Handle("GET /article/{id}", articleHandler)
 	mux.HandleFunc("GET /article/{id}/source", articleHandler.Source)
 	mux.HandleFunc("GET /article/{id}/pdf", articleHandler.PDF)
+	mux.Handle("GET /article/{id}/review", middleware.RequireAuth(review.NewGetHandler(submitReviewTempl, artRepo)))
+	mux.Handle("POST /article/{id}/review", middleware.RequireAuth(review.NewPostHandler(submitReviewTempl, revRepo, artRepo)))
+	mux.HandleFunc("GET /review/{id}", reviewHandler.View)
 	mux.HandleFunc("GET /logout", func(w http.ResponseWriter, r *http.Request) {
 		auth.ClearAuthCookie(w)
 		http.Redirect(w, r, "/", http.StatusSeeOther)

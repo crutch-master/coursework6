@@ -1,0 +1,13 @@
+{{ define "content" }}
+<h1>Review #{{ .ReviewID }}</h1>
+<article>
+  <p>{{ .ReviewText }}</p>
+</article>
+<nav>
+  <ul>
+    <li>Article: <a href="/article/{{ .ArticleID }}">{{ .DocumentName }}</a></li>
+    <li>Article author: <a href="/user/{{ .AuthorID }}">{{ .AuthorName }}</a></li>
+    <li>Reviewer: <a href="/user/{{ .ReviewerID }}">{{ .ReviewerName }}</a></li>
+  </ul>
+</nav>
+{{ end }}
