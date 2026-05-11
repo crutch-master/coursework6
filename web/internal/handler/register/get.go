@@ -1,4 +1,4 @@
-package index
+package register
 
 import (
 	"html/template"
@@ -9,17 +9,15 @@ import (
 	"github.com/crutch-master/coursework6/web/internal/middleware"
 )
 
-type Handler struct {
+type GetHandler struct {
 	templ *template.Template
 }
 
-func NewHandler(templ *template.Template) *Handler {
-	return &Handler{
-		templ: templ,
-	}
+func NewGetHandler(templ *template.Template) *GetHandler {
+	return &GetHandler{templ: templ}
 }
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (h *GetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	data := data.TemplateData{
 		IsAuthenticated: middleware.IsAuthenticated(r.Context()),
 	}
@@ -28,4 +26,4 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var _ http.Handler = (*Handler)(nil)
+var _ http.Handler = (*GetHandler)(nil)

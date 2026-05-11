@@ -1,0 +1,15 @@
+{{ define "content" }}
+<h1>Register</h1>
+{{ if .Error }}<article class="error">{{ .Error }}</article>{{ end }}
+<form action="/register" method="post">
+  <label for="name">Name</label>
+  <input type="text" id="name" name="name" required>
+  <label for="login">Login</label>
+  <input type="text" id="login" name="login" required>
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password" required>
+  <label for="description">Description</label>
+  <textarea id="description" name="description"></textarea>
+  <button type="submit">Register</button>
+</form>
+{{ end }}

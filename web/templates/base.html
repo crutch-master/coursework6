@@ -1,0 +1,28 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="static/vendor/pico.min.css">
+    <script src="static/vendor/htmx.min.js"></script>
+  </head>
+
+  <body class="container">
+    <nav>
+      <ul><li><strong>App</strong></li></ul>
+      <ul>
+        <li><a href="/">Home</a></li>
+        {{ if .IsAuthenticated }}
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/logout">Logout</a></li>
+        {{ else }}
+        <li><a href="/register">Register</a></li>
+        <li><a href="/login">Login</a></li>
+        {{ end }}
+      </ul>
+    </nav>
+    <main>
+      {{ template "content" . }}
+    </main>
+  </body>
+</html>
+{{ end }}

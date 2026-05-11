@@ -1,0 +1,11 @@
+{{ define "content" }}
+<h1>Login</h1>
+{{ if .Error }}<article class="error">{{ .Error }}</article>{{ end }}
+<form action="/login" method="post">
+  <label for="login">Login</label>
+  <input type="text" id="login" name="login" required>
+  <label for="password">Password</label>
+  <input type="password" id="password" name="password" required>
+  <button type="submit">Login</button>
+</form>
+{{ end }}
