@@ -12,3 +12,10 @@ type ReviewListItem struct {
 	ReviewerID   uint64
 	ReviewerName string
 }
+
+type UserReviewItem struct {
+	ID          uint64
+	ArticleID   uint64
+	ArticleName string
+	Text        string
+}

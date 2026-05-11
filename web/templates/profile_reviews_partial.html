@@ -1,0 +1,11 @@
+{{ define "profile_reviews_partial" }}
+{{ if .UserReviews }}
+<ul>
+  {{ range .UserReviews }}
+  <li><a href="/review/{{ .ID }}">Review #{{ .ID }}</a> on <a href="/article/{{ .ArticleID }}">{{ .ArticleName }}</a></li>
+  {{ end }}
+</ul>
+{{ else }}
+<p>No reviews yet.</p>
+{{ end }}
+{{ end }}

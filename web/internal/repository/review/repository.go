@@ -106,3 +106,40 @@ func (r *Repository) ListByArticle(ctx context.Context, articleID uint64) ([]mod
 
 	return items, rows.Err()
 }
+
+func (r *Repository) ListByReviewer(ctx context.Context, reviewerID uint64) ([]model.UserReviewItem, error) {
+	sql, args, err := squirrel.
+		Select(
+			"r."+columnID,
+			"r."+columnArticleID,
+			"a.document_name",
+			"r."+columnText,
+		).
+		From(table+" AS r").
+		InnerJoin("articles AS a ON r."+columnArticleID+" = a.id").
+		Where(squirrel.Eq{"r." + columnReviewerID: reviewerID}).
+		OrderBy("r." + columnID + " DESC").
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, fmt.Errorf("squirrel.ToSql: %w", err)
+	}
+
+	rows, err := r.conn.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("conn.Query: %w", err)
+	}
+	defer rows.Close()
+
+	var items []model.UserReviewItem
+	for rows.Next() {
+		var item model.UserReviewItem
+		if err := rows.Scan(&item.ID, &item.ArticleID, &item.ArticleName, &item.Text); err != nil {
+			return nil, fmt.Errorf("rows.Scan: %w", err)
+		}
+		items = append(items, item)
+	}
+
+	return items, rows.Err()
+}

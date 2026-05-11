@@ -1,0 +1,11 @@
+{{ define "profile_articles_partial" }}
+{{ if .UserArticles }}
+<ul>
+  {{ range .UserArticles }}
+  <li><a href="/article/{{ .ID }}">{{ .DocumentName }}</a></li>
+  {{ end }}
+</ul>
+{{ else }}
+<p>No published articles yet.</p>
+{{ end }}
+{{ end }}

@@ -1,14 +1,31 @@
 {{ define "content" }}
-<h1>{{ .Name }}</h1>
+<h1>{{ .Name }}{{ if .IsOwner }} <a href="/user/{{ .ProfileID }}/edit" role="button" class="secondary" style="font-size:0.7em;vertical-align:middle">Edit</a>{{ end }}</h1>
 <article>
   <p>{{ .Description }}</p>
 </article>
-{{ if .IsOwner }}
-<form action="/profile/description" method="POST">
-  <label>Edit description
-    <textarea name="description" rows="4">{{ .Description }}</textarea>
-  </label>
-  <button type="submit">Save</button>
-</form>
-{{ end }}
+<div style="margin-top:1rem">
+  <div role="group" style="display:flex;width:100%">
+    <button class="outline" style="flex:1"
+      hx-get="/user/{{ .ProfileID }}/tab/articles"
+      hx-target="#tab-content"
+      hx-swap="innerHTML"
+      hx-push-url="false">Articles</button>
+    <button class="outline" style="flex:1"
+      hx-get="/user/{{ .ProfileID }}/tab/reviews"
+      hx-target="#tab-content"
+      hx-swap="innerHTML"
+      hx-push-url="false">Reviews</button>
+  </div>
+  <div id="tab-content" style="margin-top:0.5rem">
+    {{ if .UserArticles }}
+    <ul>
+      {{ range .UserArticles }}
+      <li><a href="/article/{{ .ID }}">{{ .DocumentName }}</a></li>
+      {{ end }}
+    </ul>
+    {{ else }}
+    <p>No published articles yet.</p>
+    {{ end }}
+  </div>
+</div>
 {{ end }}

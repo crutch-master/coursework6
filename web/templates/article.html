@@ -1,5 +1,6 @@
 {{ define "content" }}
 <h1>{{ .DocumentName }}</h1>
+<p>{{ .ArticleDescription }}</p>
 <p>by <a href="/user/{{ .AuthorID }}">{{ .AuthorName }}</a></p>
 {{ if eq .Status "pending" }}
 <article><em>This article is compiling.</em></article>

@@ -1,0 +1,12 @@
+{{ define "content" }}
+<h1>Edit profile</h1>
+<form action="/profile/edit" method="POST">
+  <label>Name
+    <input type="text" name="name" value="{{ .Name }}">
+  </label>
+  <label>Description
+    <textarea name="description" rows="4">{{ .Description }}</textarea>
+  </label>
+  <button type="submit">Save</button>
+</form>
+{{ end }}

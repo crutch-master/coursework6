@@ -4,6 +4,8 @@
 <form action="/submit" method="post" enctype="multipart/form-data">
   <label for="name">Document Name</label>
   <input type="text" id="name" name="name" required>
+  <label for="description">Description</label>
+  <textarea id="description" name="description" rows="3"></textarea>
   <label for="document">Typst Document (.typ, max 1MB)</label>
   <input type="file" id="document" name="document" accept=".typ" required>
   <button type="submit">Submit</button>

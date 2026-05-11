@@ -75,14 +75,15 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	d := data.TemplateData{
-		IsAuthenticated: isAuth,
-		DocumentName:    a.DocumentName,
-		Status:          a.Status,
-		IsAuthor:        isAuth && middleware.GetUserID(r.Context()) == a.AuthorID,
-		ArticleID:       a.ID,
-		AuthorID:        a.AuthorID,
-		AuthorName:      author.Name,
-		Reviews:         reviews,
+		IsAuthenticated:    isAuth,
+		DocumentName:       a.DocumentName,
+		ArticleDescription: a.Description,
+		Status:             a.Status,
+		IsAuthor:           isAuth && middleware.GetUserID(r.Context()) == a.AuthorID,
+		ArticleID:          a.ID,
+		AuthorID:           a.AuthorID,
+		AuthorName:         author.Name,
+		Reviews:            reviews,
 	}
 
 	if err := h.templ.ExecuteTemplate(w, "base", d); err != nil {

@@ -93,9 +93,10 @@ func (r *Repository) GetUserByLogin(ctx context.Context, login string) (model.Us
 	return user, nil
 }
 
-func (r *Repository) UpdateDescription(ctx context.Context, id uint64, description string) error {
+func (r *Repository) UpdateProfile(ctx context.Context, id uint64, name string, description string) error {
 	sql, args, err := squirrel.
 		Update(table).
+		Set(columnName, name).
 		Set(columnDescription, description).
 		Where(squirrel.Eq{columnID: id}).
 		PlaceholderFormat(squirrel.Dollar).

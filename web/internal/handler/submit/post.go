@@ -46,6 +46,8 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	description := r.FormValue("description")
+
 	file, handler, err := r.FormFile("document")
 	if err != nil {
 		h.renderError(w, isAuth, "document is required")
@@ -72,7 +74,7 @@ func (h *PostHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.articleRepo.CreateArticle(r.Context(), name, key, userID)
+	id, err := h.articleRepo.CreateArticle(r.Context(), name, description, key, userID)
 	if err != nil {
 		slog.Error("failed to create article", "err", err)
 		h.renderError(w, isAuth, "failed to create article")
