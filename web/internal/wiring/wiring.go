@@ -44,10 +44,7 @@ func getEnvInt(key string, defaultVal int) int {
 }
 
 func Wire(ctx context.Context) (http.Handler, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, fmt.Errorf("godotenv.Load: %w", err)
-	}
+	_ = godotenv.Load()
 
 	pool, err := pgxpool.New(ctx, os.Getenv("DBSTRING"))
 	if err != nil {
