@@ -1,0 +1,17 @@
+[package]
+name = "worker"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+sqlx = { version = "0.8", features = ["runtime-tokio", "postgres"] }
+aws-sdk-s3 = "1"
+aws-config = "1"
+aws-credential-types = "1"
+typst = "0.14"
+typst-pdf = "0.14"
+typst-assets = { version = "0.14", features = ["fonts"] }
+dotenvy = "0.15"
+log = "0.4"
+env_logger = "0.11"

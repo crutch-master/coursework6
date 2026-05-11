@@ -1,0 +1,11 @@
+{{ define "content" }}
+<h1>Submit Article</h1>
+{{ if .Error }}<article class="error">{{ .Error }}</article>{{ end }}
+<form action="/submit" method="post" enctype="multipart/form-data">
+  <label for="name">Document Name</label>
+  <input type="text" id="name" name="name" required>
+  <label for="document">Typst Document (.typ, max 1MB)</label>
+  <input type="file" id="document" name="document" accept=".typ" required>
+  <button type="submit">Submit</button>
+</form>
+{{ end }}

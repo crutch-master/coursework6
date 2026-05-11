@@ -1,0 +1,15 @@
+{{ define "content" }}
+<h1>{{ .DocumentName }}</h1>
+{{ if eq .Status "pending" }}
+<article><em>This article is pending review.</em></article>
+{{ else if eq .Status "failed" }}
+<article class="error"><em>This article failed to compile.</em></article>
+{{ else if eq .Status "published" }}
+<nav>
+  <ul>
+    <li><a href="/article/{{ .ArticleID }}/source">Typst source</a></li>
+    <li><a href="/article/{{ .ArticleID }}/pdf" target="_blank">PDF</a></li>
+  </ul>
+</nav>
+{{ end }}
+{{ end }}

@@ -7,3 +7,15 @@ services:
       - POSTGRES_DB=${POSTGRES_DB}
     ports:
       - 5432:5432
+  seaweedfs:
+    image: chrislusf/seaweedfs
+    ports:
+      - 9333:9333
+      - 8080:8080
+      - 8333:8333
+    command: 'mini -ip=0.0.0.0 -ip.bind=0.0.0.0 -s3 -s3.config=/etc/seaweedfs/s3.json'
+    volumes:
+      - seaweedfs_data:/data
+      - ./seaweedfs/s3.json:/etc/seaweedfs/s3.json:ro
+volumes:
+  seaweedfs_data:
