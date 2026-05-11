@@ -6,6 +6,7 @@ import (
 	"html/template"
 	"net/http"
 	"os"
+	"strconv"
 
 	"github.com/crutch-master/coursework6/web/internal/auth"
 	"github.com/crutch-master/coursework6/web/internal/handler/article"
@@ -26,6 +27,18 @@ import (
 
 func parsePage(base *template.Template, page string) *template.Template {
 	return template.Must(template.Must(base.Clone()).ParseFS(templates.Templates, page))
+}
+
+func getEnvInt(key string, defaultVal int) int {
+	s := os.Getenv(key)
+	if s == "" {
+		return defaultVal
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		return defaultVal
+	}
+	return n
 }
 
 func Wire(ctx context.Context) (http.Handler, error) {
@@ -62,16 +75,21 @@ func Wire(ctx context.Context) (http.Handler, error) {
 		return nil, fmt.Errorf("s3client.NewClient: %w", err)
 	}
 
+	latestCount := getEnvInt("INDEX_LATEST_COUNT", 5)
+	indexHandler := index.NewHandler(indexTempl, artRepo, latestCount)
+	profileHandler := profile.NewHandler(profileTempl, userRepo)
+	articleHandler := article.NewHandler(articleTempl, artRepo, s3c, userRepo)
+
 	mux := &http.ServeMux{}
 
-	articleHandler := article.NewHandler(articleTempl, artRepo, s3c)
-
-	mux.Handle("GET /", index.NewHandler(indexTempl))
+	mux.Handle("GET /", indexHandler)
 	mux.Handle("GET /register", register.NewGetHandler(registerTempl))
 	mux.Handle("POST /register", register.NewPostHandler(registerTempl, userRepo, secret))
 	mux.Handle("GET /login", login.NewGetHandler(loginTempl))
 	mux.Handle("POST /login", login.NewPostHandler(loginTempl, userRepo, secret))
-	mux.Handle("GET /profile", middleware.RequireAuth(profile.NewHandler(profileTempl, userRepo)))
+	mux.HandleFunc("GET /profile", indexHandler.ProfileRedirect)
+	mux.Handle("POST /profile/description", middleware.RequireAuth(http.HandlerFunc(profileHandler.EditDescription)))
+	mux.Handle("GET /user/{id}", http.HandlerFunc(profileHandler.View))
 	mux.Handle("GET /submit", middleware.RequireAuth(submit.NewGetHandler(submitTempl)))
 	mux.Handle("POST /submit", middleware.RequireAuth(submit.NewPostHandler(submitTempl, artRepo, s3c)))
 	mux.Handle("GET /article/{id}", articleHandler)

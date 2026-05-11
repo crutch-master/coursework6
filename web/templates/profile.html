@@ -1,7 +1,14 @@
 {{ define "content" }}
-<h1>Profile</h1>
+<h1>{{ .Name }}</h1>
 <article>
-  <header><strong>{{ .Name }}</strong></header>
-  {{ .Description }}
+  <p>{{ .Description }}</p>
 </article>
+{{ if .IsOwner }}
+<form action="/profile/description" method="POST">
+  <label>Edit description
+    <textarea name="description" rows="4">{{ .Description }}</textarea>
+  </label>
+  <button type="submit">Save</button>
+</form>
+{{ end }}
 {{ end }}

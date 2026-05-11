@@ -12,6 +12,7 @@ import (
 	"github.com/crutch-master/coursework6/web/internal/middleware"
 	"github.com/crutch-master/coursework6/web/internal/model"
 	articleRepo "github.com/crutch-master/coursework6/web/internal/repository/article"
+	userRepo "github.com/crutch-master/coursework6/web/internal/repository/user"
 	s3client "github.com/crutch-master/coursework6/web/internal/s3"
 )
 
@@ -19,13 +20,15 @@ type Handler struct {
 	templ       *template.Template
 	articleRepo *articleRepo.Repository
 	s3Client    *s3client.Client
+	userRepo    *userRepo.Repository
 }
 
-func NewHandler(templ *template.Template, articleRepo *articleRepo.Repository, s3Client *s3client.Client) *Handler {
+func NewHandler(templ *template.Template, articleRepo *articleRepo.Repository, s3Client *s3client.Client, userRepo *userRepo.Repository) *Handler {
 	return &Handler{
 		templ:       templ,
 		articleRepo: articleRepo,
 		s3Client:    s3Client,
+		userRepo:    userRepo,
 	}
 }
 
@@ -54,12 +57,21 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	isAuth := middleware.IsAuthenticated(r.Context())
 
+	author, err := h.userRepo.GetUserByID(r.Context(), a.AuthorID)
+	if err != nil {
+		slog.Error("failed to get author", "err", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
 	d := data.TemplateData{
 		IsAuthenticated: isAuth,
 		DocumentName:    a.DocumentName,
 		Status:          a.Status,
 		IsAuthor:        isAuth && middleware.GetUserID(r.Context()) == a.AuthorID,
 		ArticleID:       a.ID,
+		AuthorID:        a.AuthorID,
+		AuthorName:      author.Name,
 	}
 
 	if err := h.templ.ExecuteTemplate(w, "base", d); err != nil {

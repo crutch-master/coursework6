@@ -1,3 +1,12 @@
 {{ define "content" }}
-<h1>welcome to the jungle, we got fun'n'games</h1>
+<h1>Latest publications</h1>
+{{ if .Articles }}
+<ul>
+  {{ range .Articles }}
+  <li><a href="/article/{{ .ID }}">{{ .DocumentName }}</a> by <a href="/user/{{ .AuthorID }}">{{ .AuthorName }}</a></li>
+  {{ end }}
+</ul>
+{{ else }}
+<p>No publications yet.</p>
+{{ end }}
 {{ end }}

@@ -4,6 +4,7 @@ import (
 	"html/template"
 	"log/slog"
 	"net/http"
+	"strconv"
 
 	"github.com/crutch-master/coursework6/web/internal/data"
 	"github.com/crutch-master/coursework6/web/internal/middleware"
@@ -22,25 +23,57 @@ func NewHandler(templ *template.Template, userRepo *user.Repository) *Handler {
 	}
 }
 
-func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	userID := middleware.GetUserID(r.Context())
-
-	u, err := h.userRepo.GetUserByID(r.Context(), userID)
+func (h *Handler) View(w http.ResponseWriter, r *http.Request) {
+	idStr := r.PathValue("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		slog.Error("failed to get user", "err", err)
-		http.Error(w, "user not found", http.StatusNotFound)
+		http.NotFound(w, r)
 		return
 	}
 
-	data := data.TemplateData{
-		IsAuthenticated: true,
-		Name:            u.Name,
-		Description:     u.Description,
+	u, err := h.userRepo.GetUserByID(r.Context(), id)
+	if err != nil {
+		slog.Error("failed to get user", "err", err)
+		http.NotFound(w, r)
+		return
 	}
 
-	if err := h.templ.ExecuteTemplate(w, "base", data); err != nil {
+	currentUserID := middleware.GetUserID(r.Context())
+	isAuth := middleware.IsAuthenticated(r.Context())
+
+	d := data.TemplateData{
+		IsAuthenticated: isAuth,
+		Name:            u.Name,
+		Description:     u.Description,
+		ProfileID:       u.ID,
+		IsOwner:         isAuth && currentUserID == u.ID,
+	}
+
+	if err := h.templ.ExecuteTemplate(w, "base", d); err != nil {
 		slog.Error("failed to execute template", "err", err)
 	}
 }
 
-var _ http.Handler = (*Handler)(nil)
+func (h *Handler) EditDescription(w http.ResponseWriter, r *http.Request) {
+	userID := middleware.GetUserID(r.Context())
+	if userID == 0 {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		slog.Error("failed to parse form", "err", err)
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	description := r.FormValue("description")
+
+	if err := h.userRepo.UpdateDescription(r.Context(), userID, description); err != nil {
+		slog.Error("failed to update description", "err", err)
+		http.Error(w, "internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/user/"+strconv.FormatUint(userID, 10), http.StatusSeeOther)
+}

@@ -72,3 +72,41 @@ func (r *Repository) GetArticleByID(ctx context.Context, id uint64) (model.Artic
 
 	return a, nil
 }
+
+func (r *Repository) ListPublished(ctx context.Context, limit int) ([]model.ArticleListItem, error) {
+	sql, args, err := squirrel.
+		Select(
+			"a."+columnID,
+			"a."+columnDocumentName,
+			"a."+columnAuthorID,
+			"u.name",
+		).
+		From(table+" AS a").
+		InnerJoin("users AS u ON a."+columnAuthorID+" = u.id").
+		Where(squirrel.Eq{"a." + columnStatus: "published"}).
+		OrderBy("a." + columnID + " DESC").
+		Limit(uint64(limit)).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	if err != nil {
+		return nil, fmt.Errorf("squirrel.ToSql: %w", err)
+	}
+
+	rows, err := r.conn.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("conn.Query: %w", err)
+	}
+	defer rows.Close()
+
+	var items []model.ArticleListItem
+	for rows.Next() {
+		var item model.ArticleListItem
+		if err := rows.Scan(&item.ID, &item.DocumentName, &item.AuthorID, &item.AuthorName); err != nil {
+			return nil, fmt.Errorf("rows.Scan: %w", err)
+		}
+		items = append(items, item)
+	}
+
+	return items, rows.Err()
+}

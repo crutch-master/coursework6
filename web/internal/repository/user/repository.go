@@ -92,3 +92,27 @@ func (r *Repository) GetUserByLogin(ctx context.Context, login string) (model.Us
 
 	return user, nil
 }
+
+func (r *Repository) UpdateDescription(ctx context.Context, id uint64, description string) error {
+	sql, args, err := squirrel.
+		Update(table).
+		Set(columnDescription, description).
+		Where(squirrel.Eq{columnID: id}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+
+	if err != nil {
+		return fmt.Errorf("squirrel.ToSql: %w", err)
+	}
+
+	tag, err := r.conn.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("conn.Exec: %w", err)
+	}
+
+	if tag.RowsAffected() == 0 {
+		return fmt.Errorf("no rows affected")
+	}
+
+	return nil
+}
