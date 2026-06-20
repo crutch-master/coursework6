@@ -47,7 +47,9 @@
 
 ## Запуск
 
-1. Создайте файл `.env` на основе примера ниже:
+1. В директории `seaweedfs` скопируйте `s3.example.json` в `s3.json` и отредактируйте по вкусу.
+
+2. Создайте файл `.env` на основе примера ниже с актуальными значениями из `seaweedfs/s3.json`:
 
 ```env
 POSTGRES_PASSWORD=pass
@@ -62,13 +64,13 @@ S3_BUCKET=articles
 JWT_SECRET=changeme
 ```
 
-2. Скачайте фронтенд-зависимости (htmx, Pico CSS):
+3. Скачайте фронтенд-зависимости (htmx, Pico CSS):
 
 ```bash
 make vendor
 ```
 
-3. Запустите все сервисы:
+4. Запустите все сервисы:
 
 ```bash
 docker compose up --build

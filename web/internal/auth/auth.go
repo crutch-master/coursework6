@@ -52,7 +52,19 @@ func SetAuthCookie(w http.ResponseWriter, token string) {
 		Value:    token,
 		Path:     "/",
 		HttpOnly: true,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   true,
+		// Строго говоря, SameSiteLaxMode уже предотвращает CSRF для POST-запросов, поскольку
+		// браузер не станет отправлять нам Cookie при запросе с другого домена. Более того,
+		// актуальные версии современных браузеров автоматически ставят всем Cookie, у которых
+		// не указан SameSite, SameSite: Lax, так что CSRF для POST сегодня можно допустить только
+		// умышленно, если специально выставить SameSite: None.
+		//
+		// Я так понимаю, в отзыве ошибка и имелись в виду GET-запросы, которые в своем ответе
+		// могут содержать чуствительные данные пользователя, поэтому их тоже стоит защищать,
+		// даже если ни к каким измененям они не приводят. Для этого достаточно выставить
+		// SameSite: Strict, который заставляет браузер отправлять Cookie исключительно при
+		// запросах с нашего домена.
+		SameSite: http.SameSiteStrictMode,
 		MaxAge:   86400,
 	})
 }
@@ -63,6 +75,8 @@ func ClearAuthCookie(w http.ResponseWriter) {
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
 		MaxAge:   -1,
 	})
 }
